@@ -5,7 +5,7 @@
 
 ![tests](https://github.com/wang2067562393-dot/teleop-link-lab/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
-![tests](https://img.shields.io/badge/tests-60%20passed-2EA44E)
+![tests](https://img.shields.io/badge/tests-67%20passed-2EA44E)
 ![deps](https://img.shields.io/badge/dependencies-标准库-16A34A)
 
 ## 为什么做这个
@@ -105,10 +105,58 @@
 git clone https://github.com/wang2067562393-dot/teleop-link-lab
 cd teleop-link-lab
 
-python -m unittest discover -s tests -v     # 60 个测试，零依赖
+python -m unittest discover -s tests -v     # 67 个测试，零依赖
 python -m teleoplab suite --duration 6      # 6 个场景，约 38 秒
 python -m teleoplab run --delay-ms 100 --loss 0.05 --json   # 单场景
 ```
+
+## 跨机器模式
+
+单机回环是最大的一条局限。现在可以拆成三个进程跑，跨机器用：
+
+```bash
+# 机器 A（机器人端）
+python -m teleoplab serve --role robot --port 9100 --duration 40
+
+# 机器 B（代理，可选；放在第三台机器上最接近真实弱网）
+python -m teleoplab serve --role proxy --listen-port 9000 \
+    --robot 192.168.1.5:9100 --delay-ms 50 --duration 35
+
+# 机器 C（控制端）
+python -m teleoplab serve --role operator \
+    --proxy 192.168.1.6:9000 --duration 20 --out reports/remote.json
+```
+
+### 时钟怎么对齐
+
+跨机器第一件事是**别信时间戳**：两端的 `perf_counter_ns()` 起点不同、还会各自漂移。但只有一半的指标受影响：
+
+| 指标 | 是否依赖跨机器时钟 | 原因 |
+|---|---|---|
+| 指令往返（cmd_age） | **不依赖** | 发送 `t0` 与收到 `t2` 都在控制端时钟上，差值就是往返 |
+| 画面端到端 | 依赖 | 采集时间戳由机器人打，必须先换算 |
+
+换算用不新增报文的办法：机器人收到指令会立即回带自己时间戳的 `state`，于是
+
+```
+offset_i = ts_robot - (t0 + t2) / 2
+```
+
+单程不对称会让每个样本带误差（上下行差 `d` 则误差约 `d/2`），所以取 **RTT 最小** 的样本
+而不是平均——平均会被抖动放大。实现见 `teleoplab/remote.py` 的 `OffsetEstimator`。
+
+### 本机验证结果（192.168.3.117，走真实网卡）
+
+| 指标 | 注入 | 实测 |
+|---|---|---|
+| 指令往返 p50 | 50 ms 单向 | **101.88 ms** |
+| 指令往返 p95 | 同上 | 102.90 ms |
+| 抖动 | — | 0.70 ms |
+| 时钟偏移估计 | — | **0.028 ms**（481 样本，最小 RTT 100.5 ms） |
+| 画面端到端（校正后） | — | 51.67 ms |
+
+同机两进程走 LAN 地址，偏移估计误差 0.03 ms —— 说明算法本身没错。
+**真实双机（不同主机、Wi-Fi）还没跑过**，这是下一步要补的数字。
 
 ## 调试记录
 
@@ -146,6 +194,25 @@ Windows 上 `loop.time()` 来自 `GetTickCount64`，分辨率约 15.6 ms，**事
 > 教训：**先证明测量工具没坏，再去测别人。** 如果没做这三步，后面所有「弱网下延迟多少」
 > 的结论都会建立在一个偏早 6 ms 的注入器上。
 
+### ④ 跨机器模式：注入 50 ms 却测出 111 ms，代理进程忘了提高定时器分辨率
+
+把链路拆成三个进程后第一次测：注入 50 ms 单向（往返理论 100 ms），
+实测 **p50 = 110.98 ms，抖动 3.46 ms**，而最小 RTT 是 100.6 ms —— 说明基准路径是准的，
+多出来的 ~10 ms 只在部分样本上出现。
+
+原因：`high_resolution_timer()`（`timeBeginPeriod(1)`）只在 robot 与 operator 进程里调用过，
+**代理进程漏了**。代理的延迟注入由独立线程排程，进程仍停留在 Windows 默认 15.6 ms
+定时器粒度，于是 50 ms 的注入被量化成 60 多毫秒。
+
+处理：`run_proxy()` 同样包一层 `high_resolution_timer()`。复测：
+
+| | 修复前 | 修复后 |
+|---|---|---|
+| 指令往返 p50 | 110.98 ms | **101.88 ms** |
+| 抖动 | 3.46 ms | **0.70 ms** |
+
+> 这是第三次栽在同一件事上：**定时器分辨率是每个进程各自的事，漏一个进程就污染整条链路。**
+
 ## 降级策略
 
 | 等级 | 帧率 | 分辨率 | 下行码率（实测） | 用途 |
@@ -165,7 +232,8 @@ Windows 上 `loop.time()` 来自 `GetTickCount64`，分辨率约 15.6 ms，**事
 - **降级不降低延迟**。本模型里延迟是人为固定注入的，与带宽无关；真实弱网里两者耦合，
   要看到降级收益需要带宽受限模型。这一条不是 bug，是这次实验的结论。
 - **没有编解码**。v0.1 传原始像素，所以「画面 p95」不含编码/解码开销；H.264 路径是下一步。
-- **单机回环**。两端在同一进程域，共享时钟；跨机器需要先做时钟同步，否则时间戳不可比。
+- **单机回环仍是默认路径**。`suite` / `run` 仍是单机回环；跨机器要用 `serve` 的三个角色，
+  且只在同一台机器的两个进程上验证过（LAN 地址），**真实双机 / Wi-Fi 尚未实测**。
 - **基线与抖动不可跨机器比较**。0.4 ms 基线与 3 ms 抖动都是本机调度噪声量级，换机器可能差 2×；
   跨机器只有「注入值 → 实测值」的相对关系和码率可比（见上面「跨机器复现」一节）。
 - **Windows 定时器限制**。100 Hz 物理步长在 Windows 上实际约 60–65 Hz（帧率由累计 dt 控制，
@@ -174,6 +242,7 @@ Windows 上 `loop.time()` 来自 `GetTickCount64`，分辨率约 15.6 ms，**事
 
 ## 下一步
 
+- [ ] 真实双机 / Wi-Fi 实测（跨机器模式已实现，缺真实链路数字）
 - [ ] H.264 编码路径，测编码/解码各占多少毫秒，把「画面 p95」拆成四段
 - [ ] 带宽受限代理（令牌桶），验证「降级确实能救丢帧率」
 - [ ] 玻璃到玻璃延迟：用手机 240 fps 慢动作校准软件打点，给出误差范围

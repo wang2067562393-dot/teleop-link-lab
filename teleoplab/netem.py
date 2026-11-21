@@ -96,16 +96,21 @@ class NetemProxy:
         self._loop: asyncio.AbstractEventLoop | None = None
         self._delay: DelayQueue | None = None
 
-    async def start(self) -> None:
+    async def start(self, *, bind: str = "127.0.0.1", listen_port: int = 0) -> None:
+        """启动双向代理。
+
+        `bind` / `listen_port` 是为跨机器场景加的：控制端在另一台机器上时，
+        代理必须监听 `0.0.0.0` 并给出固定端口，否则对端无从连接。
+        """
         self._loop = asyncio.get_running_loop()
         self._delay = DelayQueue(self._loop)
         self._client_pipe.handler = self._from_operator
         self._robot_pipe.handler = self._from_robot
         t1, _ = await self._loop.create_datagram_endpoint(
-            lambda: self._client_pipe, local_addr=("127.0.0.1", 0)
+            lambda: self._client_pipe, local_addr=(bind, listen_port)
         )
         t2, _ = await self._loop.create_datagram_endpoint(
-            lambda: self._robot_pipe, local_addr=("127.0.0.1", 0)
+            lambda: self._robot_pipe, local_addr=(bind, 0)
         )
         self.listen_port = t1.get_extra_info("sockname")[1]
         self.robot_port = t2.get_extra_info("sockname")[1]
