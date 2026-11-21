@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "teleop-lab"
+version = "0.1.0"
+description = "遥操作链路的最小可运行实验台：端到端延迟测量、弱网注入、可观测性与降级策略"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "wang" }]
+keywords = ["teleoperation", "latency", "robotics", "observability", "asyncio"]
+
+[project.scripts]
+teleoplab = "teleoplab.cli:main"
+
+[tool.setuptools]
+packages = ["teleoplab"]
+
+[tool.ruff]
+line-length = 100

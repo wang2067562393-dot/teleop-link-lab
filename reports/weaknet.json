@@ -1,0 +1,336 @@
+[
+  {
+    "scenario": "baseline",
+    "netem": {
+      "delay_ms": 0.0,
+      "jitter_ms": 0.0,
+      "loss": 0.0
+    },
+    "duration_s": 6.0,
+    "degradation": true,
+    "cmd_age_ms": {
+      "count": 361,
+      "mean": 0.40883905817174515,
+      "std": 0.10490403449009267,
+      "p50": 0.3993,
+      "p95": 0.5767,
+      "p99": 0.6573,
+      "max": 1.1944
+    },
+    "cmd_jitter_ms": 0.10822027777777783,
+    "video_latency_ms": {
+      "count": 120,
+      "mean": 0.3358699999999999,
+      "std": 0.07606933525847762,
+      "p50": 0.3304,
+      "p95": 0.4733,
+      "p99": 0.5309,
+      "max": 0.5349
+    },
+    "counts": {
+      "cmds_sent": 361,
+      "states_received": 960,
+      "frames_sent": 120,
+      "frames_received": 120
+    },
+    "frame_drop_rate": 0.0,
+    "downlink_kbps": 495.68,
+    "proxy": {
+      "up_forwarded": 361,
+      "up_dropped": 0,
+      "down_forwarded": 1080,
+      "down_dropped": 0
+    },
+    "policy": {
+      "final_level": 0,
+      "transitions": [],
+      "profile": [
+        20,
+        64,
+        48
+      ]
+    }
+  },
+  {
+    "scenario": "delay-100ms",
+    "netem": {
+      "delay_ms": 100.0,
+      "jitter_ms": 0.0,
+      "loss": 0.0
+    },
+    "duration_s": 6.0,
+    "degradation": true,
+    "cmd_age_ms": {
+      "count": 359,
+      "mean": 205.76776852367703,
+      "std": 4.140929844804691,
+      "p50": 203.7521,
+      "p95": 213.2149,
+      "p99": 223.6222,
+      "max": 224.7529
+    },
+    "cmd_jitter_ms": 3.1406379888268163,
+    "video_latency_ms": {
+      "count": 118,
+      "mean": 103.53811355932207,
+      "std": 3.2160301190436344,
+      "p50": 102.0038,
+      "p95": 109.9558,
+      "p99": 114.9132,
+      "max": 115.6164
+    },
+    "counts": {
+      "cmds_sent": 361,
+      "states_received": 948,
+      "frames_sent": 120,
+      "frames_received": 118
+    },
+    "frame_drop_rate": 0.01666666666666672,
+    "downlink_kbps": 495.68,
+    "proxy": {
+      "up_forwarded": 361,
+      "up_dropped": 0,
+      "down_forwarded": 1068,
+      "down_dropped": 0
+    },
+    "policy": {
+      "final_level": 0,
+      "transitions": [],
+      "profile": [
+        20,
+        64,
+        48
+      ]
+    }
+  },
+  {
+    "scenario": "delay-100ms+loss-5%",
+    "netem": {
+      "delay_ms": 100.0,
+      "jitter_ms": 0.0,
+      "loss": 0.05
+    },
+    "duration_s": 6.0,
+    "degradation": true,
+    "cmd_age_ms": {
+      "count": 335,
+      "mean": 206.588976119403,
+      "std": 4.733324820723218,
+      "p50": 204.416,
+      "p95": 215.4757,
+      "p99": 223.7034,
+      "max": 226.3628
+    },
+    "cmd_jitter_ms": 4.007523053892216,
+    "video_latency_ms": {
+      "count": 110,
+      "mean": 103.93298000000003,
+      "std": 2.939692315711722,
+      "p50": 103.4241,
+      "p95": 109.868,
+      "p99": 114.0363,
+      "max": 114.1539
+    },
+    "counts": {
+      "cmds_sent": 361,
+      "states_received": 884,
+      "frames_sent": 120,
+      "frames_received": 110
+    },
+    "frame_drop_rate": 0.08333333333333337,
+    "downlink_kbps": 495.68,
+    "proxy": {
+      "up_forwarded": 340,
+      "up_dropped": 21,
+      "down_forwarded": 996,
+      "down_dropped": 51
+    },
+    "policy": {
+      "final_level": 0,
+      "transitions": [],
+      "profile": [
+        20,
+        64,
+        48
+      ]
+    }
+  },
+  {
+    "scenario": "delay-200ms+jitter-20ms+loss-10%",
+    "netem": {
+      "delay_ms": 200.0,
+      "jitter_ms": 20.0,
+      "loss": 0.1
+    },
+    "duration_s": 6.0,
+    "degradation": true,
+    "cmd_age_ms": {
+      "count": 309,
+      "mean": 404.99715663430425,
+      "std": 13.658717659540311,
+      "p50": 405.6413,
+      "p95": 428.115,
+      "p99": 437.8952,
+      "max": 441.7243
+    },
+    "cmd_jitter_ms": 15.260813311688302,
+    "video_latency_ms": {
+      "count": 55,
+      "mean": 199.793329090909,
+      "std": 10.292382806499056,
+      "p50": 200.3962,
+      "p95": 218.7557,
+      "p99": 219.383,
+      "max": 219.383
+    },
+    "counts": {
+      "cmds_sent": 361,
+      "states_received": 817,
+      "frames_sent": 59,
+      "frames_received": 55
+    },
+    "frame_drop_rate": 0.06779661016949157,
+    "downlink_kbps": 154.62133333333335,
+    "proxy": {
+      "up_forwarded": 328,
+      "up_dropped": 35,
+      "down_forwarded": 883,
+      "down_dropped": 79
+    },
+    "policy": {
+      "final_level": 2,
+      "transitions": [
+        [
+          60,
+          0,
+          1
+        ],
+        [
+          120,
+          1,
+          2
+        ]
+      ],
+      "profile": [
+        5,
+        16,
+        12
+      ]
+    }
+  },
+  {
+    "scenario": "delay-300ms-无降级",
+    "netem": {
+      "delay_ms": 300.0,
+      "jitter_ms": 0.0,
+      "loss": 0.0
+    },
+    "duration_s": 6.0,
+    "degradation": false,
+    "cmd_age_ms": {
+      "count": 335,
+      "mean": 607.0763462686565,
+      "std": 3.9085266191234407,
+      "p50": 607.1263,
+      "p95": 614.773,
+      "p99": 616.2761,
+      "max": 617.9558
+    },
+    "cmd_jitter_ms": 3.2727592814371285,
+    "video_latency_ms": {
+      "count": 112,
+      "mean": 303.24093749999986,
+      "std": 3.129962929981447,
+      "p50": 301.9066,
+      "p95": 311.1171,
+      "p99": 313.3988,
+      "max": 313.9916
+    },
+    "counts": {
+      "cmds_sent": 361,
+      "states_received": 895,
+      "frames_sent": 120,
+      "frames_received": 112
+    },
+    "frame_drop_rate": 0.06666666666666665,
+    "downlink_kbps": 495.68,
+    "proxy": {
+      "up_forwarded": 361,
+      "up_dropped": 0,
+      "down_forwarded": 1038,
+      "down_dropped": 0
+    },
+    "policy": {
+      "final_level": 0,
+      "transitions": [],
+      "profile": [
+        20,
+        64,
+        48
+      ]
+    }
+  },
+  {
+    "scenario": "delay-300ms-有降级",
+    "netem": {
+      "delay_ms": 300.0,
+      "jitter_ms": 0.0,
+      "loss": 0.0
+    },
+    "duration_s": 6.0,
+    "degradation": true,
+    "cmd_age_ms": {
+      "count": 336,
+      "mean": 606.6760991071429,
+      "std": 3.8612084246824208,
+      "p50": 606.2747,
+      "p95": 614.3306,
+      "p99": 615.8614,
+      "max": 619.7451
+    },
+    "cmd_jitter_ms": 3.5289229850746304,
+    "video_latency_ms": {
+      "count": 55,
+      "mean": 303.395810909091,
+      "std": 2.6848681379960664,
+      "p50": 302.0795,
+      "p95": 309.3439,
+      "p99": 311.4646,
+      "max": 311.4646
+    },
+    "counts": {
+      "cmds_sent": 361,
+      "states_received": 895,
+      "frames_sent": 61,
+      "frames_received": 55
+    },
+    "frame_drop_rate": 0.09836065573770492,
+    "downlink_kbps": 166.72266666666667,
+    "proxy": {
+      "up_forwarded": 363,
+      "up_dropped": 0,
+      "down_forwarded": 979,
+      "down_dropped": 0
+    },
+    "policy": {
+      "final_level": 2,
+      "transitions": [
+        [
+          60,
+          0,
+          1
+        ],
+        [
+          120,
+          1,
+          2
+        ]
+      ],
+      "profile": [
+        5,
+        16,
+        12
+      ]
+    }
+  }
+]

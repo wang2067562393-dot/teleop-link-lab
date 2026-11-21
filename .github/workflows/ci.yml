@@ -1,0 +1,22 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: 单元测试
+        run: python -m unittest discover -s tests -v
+      - name: 端到端冒烟（1.5 秒，固定种子）
+        run: python -m teleoplab run --name smoke --delay-ms 50 --loss 0.02 --duration 1.5 --json
